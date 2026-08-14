@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation: Birthday 🎂</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+body{overflow-x:hidden;background:#fff5fb;color:#35152c}
+button{font:inherit;cursor:pointer;border:0}
+canvas{position:fixed;inset:0;pointer-events:none;z-index:20}
+#app{min-height:100vh;position:relative}
+.screen{min-height:100vh;display:none;place-items:center;padding:28px;position:relative;overflow:hidden}
+.screen.active{display:grid}
+.card{width:min(720px,94vw);background:rgba(255,255,255,.84);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.9);box-shadow:0 25px 80px rgba(91,29,72,.16);border-radius:30px;padding:42px;text-align:center;position:relative;z-index:2}
+h1,h2{margin:.2em 0}.eyebrow{letter-spacing:.18em;text-transform:uppercase;font-size:.75rem;font-weight:800;color:#b02d77}
+.sub{color:#76576c;line-height:1.7}
+.btn{padding:14px 22px;border-radius:999px;background:#d93486;color:white;font-weight:800;box-shadow:0 10px 25px rgba(217,52,134,.25);transition:.2s}
+.btn:hover{transform:translateY(-3px) rotate(-1deg)}
+.btn.alt{background:#fff;color:#a92367;border:1px solid #f0c4dc}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.heart{font-size:78px;animation:float 2.2s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-12px) rotate(5deg)}}
+@keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .7s cubic-bezier(.2,1.5,.4,1)}
+.blob{position:absolute;border-radius:50%;filter:blur(2px);opacity:.5;animation:drift 8s ease-in-out infinite}
+.b1{width:240px;height:240px;background:#ffd0e8;left:-70px;top:8%}.b2{width:320px;height:320px;background:#e5d7ff;right:-100px;bottom:-60px;animation-delay:-3s}
+@keyframes drift{50%{transform:translate(25px,-30px) scale(1.08)}}
+.progress{height:12px;background:#f2dbe8;border-radius:20px;overflow:hidden;margin:20px 0}.bar{height:100%;width:0;background:linear-gradient(90deg,#ff6aaa,#a83cff);transition:width .4s}
+.meter{font-size:3.2rem;font-weight:900;color:#c52f7a}
+.terminal{background:#241622;color:#ffd9ed;text-align:left;padding:20px;border-radius:18px;font-family:ui-monospace,monospace;min-height:130px;line-height:1.7}
+.type{border-right:2px solid #ff75b6}
+.question{font-size:1.2rem;font-weight:800;margin:22px}
+#noBtn{position:relative}
+.gift{font-size:100px;animation:bob 1.5s infinite}.gift.open{animation:shake .5s}
+@keyframes bob{50%{transform:translateY(-10px) rotate(3deg)}}@keyframes shake{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+.secret{display:none;margin-top:20px;padding:22px;border-radius:20px;background:#fff0f7;border:1px dashed #e89bc3}
+.secret.show{display:block;animation:pop .5s}
+.letter{text-align:left;background:#fffdf8;padding:30px;border-radius:18px;box-shadow:inset 0 0 0 1px #f1e3d2;line-height:1.9;position:relative}
+.letter:before{content:"";position:absolute;inset:12px;border:1px solid #f0d8e4;border-radius:12px;pointer-events:none}
+.small{font-size:.85rem;color:#8a6a7c}
+.footer{margin-top:20px;font-size:.8rem;color:#987489}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div id="app">
+
+<section class="screen active" id="s1">
+<div class="blob b1"></div><div class="blob b2"></div>
+<div class="card pop">
+<div class="heart">💌</div>
+<div class="eyebrow">Classified Birthday Mission</div>
+<h1>Hey, Birthday Girl.</h1>
+<p class="sub">You have received a highly suspicious website.<br>There may be cake. There may be chaos. There may even be a compliment.</p>
+<div class="row"><button class="btn" onclick="go(2)">Investigate →</button></div>
+<p class="footer">Warning: excessive cuteness may occur.</p>
+</div>
+</section>
+
+<section class="screen" id="s2">
+<div class="card">
+<div class="eyebrow">System Booting...</div>
+<h2>Running Birthday Diagnostics 🤖</h2>
+<div class="terminal" id="terminal"></div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<p class="small" id="diag">Please remain fabulous.</p>
+</div>
+</section>
+
+<section class="screen" id="s3">
+<div class="blob b2"></div>
+<div class="card pop">
+<div class="eyebrow">Official Scientific Report</div>
+<h2>Birthday Compatibility Results</h2>
+<div class="meter" id="meter">0%</div>
+<p class="sub">Probability that today should be celebrated ridiculously hard.</p>
+<div class="row"><button class="btn" onclick="runMeter()">Calculate Again 😂</button><button class="btn alt" onclick="go(4)">Accept Results</button></div>
+</div>
+</section>
+
+<section class="screen" id="s4">
+<div class="card pop">
+<div class="eyebrow">Extremely Important Question</div>
+<h2>Will you accept your birthday wish? 🎂</h2>
+<p class="question">Choose carefully. One button is emotionally unavailable.</p>
+<div class="row">
+<button class="btn" onclick="yes()">YES, obviously 💖</button>
+<button class="btn alt" id="noBtn" onmouseenter="escapeNo()">No 😐</button>
+</div>
+<p class="footer">The "No" button has suspicious survival instincts.</p>
+</div>
+</section>
+
+<section class="screen" id="s5">
+<div class="card pop">
+<div class="eyebrow">Congratulations</div>
+<h2>You passed the extremely difficult test. 🏆</h2>
+<div class="gift" id="gift">🎁</div>
+<p class="sub">Your reward is hidden inside this suspiciously dramatic gift box.</p>
+<button class="btn" onclick="openGift()">Open the gift 🎁</button>
+<div class="secret" id="secret">
+<h3>✨ Surprise! ✨</h3>
+<p>Official announcement: you are allowed to be <b>extra happy today</b>.</p>
+<p>Eat the cake. Ignore the calories. Take approximately 700 pictures. Be slightly annoying. It's your birthday.</p>
+<button class="btn" onclick="go(6)">There is more... 👀</button>
+</div>
+</div>
+</section>
+
+<section class="screen" id="s6">
+<div class="card pop">
+<div class="eyebrow">One Serious Minute</div>
+<div class="letter">
+<h2>Happy Birthday! 🌷</h2>
+<p>I hope this year gives you more reasons to smile, more moments that make you genuinely happy, and a lot of unexpected good things.</p>
+<p>And yes, I could have just sent “Happy Birthday” like a normal person...</p>
+<p>But apparently I chose to build an entire website instead. 😭</p>
+<p>So here it is: a tiny internet corner made specially to make your birthday a little more memorable.</p>
+<p><b>Stay happy. Stay weird. And please don't let this website inflate your ego too much. 😌</b></p>
+</div>
+<div class="row"><button class="btn" onclick="finale()">One Last Thing 🎉</button></div>
+</div>
+</section>
+
+<section class="screen" id="s7">
+<div class="card pop">
+<div class="heart">🎂</div>
+<div class="eyebrow">Mission Complete</div>
+<h1>HAPPY BIRTHDAY! 🥳</h1>
+<p class="sub">May your day be 10× happier than this website is unnecessarily dramatic.</p>
+<div class="row"><button class="btn" onclick="location.reload()">Replay the chaos ↻</button></div>
+</div>
+</section>
+
+</div>
+
+<script>
+const screens=[...document.querySelectorAll('.screen')];
+function go(n){screens.forEach(s=>s.classList.remove('active'));document.getElementById('s'+n).classList.add('active');window.scrollTo(0,0);if(n===2)boot();if(n===3)runMeter();}
+const terminalLines=[
+"Initializing birthday.exe...",
+"Checking cake inventory... FOUND 🍰",
+"Scanning for boring people... NONE DETECTED",
+"Installing extra happiness... 100%",
+"Generating unnecessary animations... COMPLETE",
+"Final diagnosis: TOO AWESOME."
+];
+function boot(){
+ const t=document.getElementById('terminal'),b=document.getElementById('bar');t.innerHTML='';b.style.width='0';
+ let i=0;
+ const timer=setInterval(()=>{
+   if(i>=terminalLines.length){clearInterval(timer);setTimeout(()=>go(3),700);return}
+   t.innerHTML += '<div><span class="type">'+terminalLines[i]+'</span></div>';
+   b.style.width=((i+1)/terminalLines.length*100)+'%';i++;
+ },500);
+}
+function runMeter(){
+ const el=document.getElementById('meter');let v=0;
+ const target=97+Math.floor(Math.random()*4);
+ const timer=setInterval(()=>{v+=Math.ceil(Math.random()*8);if(v>=target){v=target;clearInterval(timer)}el.textContent=v+'%';},60);
+}
+function escapeNo(){
+ const b=document.getElementById('noBtn');
+ b.style.position='fixed';
+ b.style.left=Math.random()*(innerWidth-130)+'px';
+ b.style.top=Math.random()*(innerHeight-60)+'px';
+}
+function yes(){confetti();go(5)}
+function openGift(){
+ document.getElementById('gift').classList.add('open');
+ document.getElementById('gift').textContent='🎉';
+ document.getElementById('secret').classList.add('show');
+ confetti();
+}
+function finale(){confetti(180);go(7)}
+const canvas=document.getElementById('fx'),ctx=canvas.getContext('2d');let pieces=[];
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight}addEventListener('resize',resize);resize();
+function confetti(count=90){
+ for(let i=0;i<count;i++)pieces.push({x:innerWidth/2,y:innerHeight*.25,vx:(Math.random()-.5)*10,vy:Math.random()*-8-3,g:0.25,s:5+Math.random()*7,r:Math.random()*6});
+}
+function animate(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ pieces=pieces.filter(p=>p.y<canvas.height+30);
+ for(const p of pieces){p.x+=p.vx;p.vy+=p.g;p.y+=p.vy;p.r+=.1;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=['#ff5fa2','#ffd166','#7bdff2','#b8f2a6','#c77dff'][Math.floor(Math.random()*5)];ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);ctx.restore()}
+ requestAnimationFrame(animate)
+}animate();
+</script>
+</body>
+</html>
